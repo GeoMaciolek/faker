@@ -171,8 +171,32 @@ class Provider(BaseProvider):
         )
 
     @slugify_unicode
-    def user_name(self):
+    def user_name(self, first_name: str=None, last_name: str=None):
+        """Generates a username. If called with no parameters, it generates a
+        username based on random first & last names. If both ``first_name`` and
+        ``last_name`` are given, it generates a username based on the specified
+        names (with the standard formats)
+
+        Args:
+            first_name (str, optional): A first name. Defaults to None.
+            last_name (str, optional): A last name. Defaults to None.
+
+        Returns:
+            str: The generated username
+        """
+
         pattern = self.random_element(self.user_name_formats)
+        if first_name and last_name:
+            # Set our assorted arguments that will override the standard content here
+            self.generator.set_arguments('pystr_fname', 'string_format', first_name)
+            self.generator.set_arguments('pystr_lname', 'string_format', last_name)
+            self.generator.set_arguments('first_name', 'first_name', first_name)
+
+            # (We use pystr_format as it's the closest to "just return this string")
+            pattern = pattern.replace('{{first_name}}', '{{pystr_format:pystr_fname}}')
+            pattern = pattern.replace('{{last_name}}', '{{pystr_format:pystr_lname}}')
+            pattern = pattern.replace('{{first_name_abbreviated}}', '{{first_name_abbreviated:first_name}}')
+
         username = self._to_ascii(
             self.bothify(self.generator.parse(pattern)).lower(),
         )
