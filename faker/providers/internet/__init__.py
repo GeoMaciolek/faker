@@ -119,11 +119,27 @@ class Provider(BaseProvider):
         return string
 
     @lowercase
-    def email(self, domain=None):
+    def email(self, domain=None, first_name: str=None, last_name: str=None):
+        """Generate an e-mail address, optionally with specified domain, and
+        user first & names. If both ``first_name`` and ``last_name`` are
+        specified, we will generate a username based on them. 
+
+        Args:
+            domain (str, optional): The domain name
+            first_name (str, optional): First Name
+            last_name (str, optional): Last Name
+        Returns:
+            str: The generated e-mail address
+        """
         if domain:
-            email = f'{self.user_name()}@{domain}'
+            email = f'{self.user_name(first_name=first_name, last_name=last_name)}@{domain}'
         else:
             pattern = self.random_element(self.email_formats)
+            if first_name and last_name:
+                # We will use the "arguments" feature to pass along the desired
+                # first & last names, and update the pattern to include them.
+                self.generator.set_arguments('nameargs', {'first_name': first_name, 'last_name': last_name})
+                pattern = pattern.replace('user_name', 'user_name:nameargs')
             email = "".join(self.generator.parse(pattern).split(" "))
         return email
 
@@ -132,42 +148,130 @@ class Provider(BaseProvider):
         return self.random_element(self.safe_domain_names)
 
     @lowercase
-    def safe_email(self):
-        return self.user_name() + '@' + self.safe_domain_name()
+    def safe_email(self, first_name: str=None, last_name: str=None):
+        """Generate an e-mail address with a "safe" domain name, optionally with
+        specified user first & names. If both ``first_name`` and ``last_name``
+        are specified, we will generate a username based on them. 
+
+        Args:
+            first_name (str, optional): First Name
+            last_name (str, optional): Last Name
+        Returns:
+            str: The generated e-mail address
+        """
+
+        return self.user_name(first_name=first_name, last_name=last_name) + '@' + self.safe_domain_name()
 
     @lowercase
-    def free_email(self):
-        return self.user_name() + '@' + self.free_email_domain()
+    def free_email(self, first_name: str=None, last_name: str=None):
+        """Generate a free e-mail address. If both ``first_name`` and
+        ``last_name`` are specified, we will generate a username based on them.
+
+        Args:
+            first_name (str, optional): First Name
+            last_name (str, optional): Last Name
+        Returns:
+            str: The generated e-mail address
+        """
+
+        # # # Check for first_name & last_name, pass along if both
+        # if first_name and last_name:
+        #     return self.user_name(first_name=first_name, last_name=last_name) + '@' + self.free_email_domain()
+        # # If we don't get both a first & last name, use the default random names
+        return self.user_name(first_name=first_name, last_name=last_name) + '@' + self.free_email_domain()
 
     @lowercase
-    def company_email(self):
-        return self.user_name() + '@' + self.domain_name()
+    def company_email(self, first_name: str=None, last_name: str=None):
+        """Generate a "company"  e-mail address (based on ``domain_name()``). If
+        both ``first_name`` and ``last_name`` are specified, we will generate a
+        username based on them.
+
+        Args:
+            first_name (str, optional): First Name
+            last_name (str, optional): Last Name
+        Returns:
+            str: The generated e-mail address
+        """
+
+        return self.user_name(first_name=first_name, last_name=last_name) + '@' + self.domain_name()
 
     @lowercase
     def free_email_domain(self):
         return self.random_element(self.free_email_domains)
 
     @lowercase
-    def ascii_email(self):
+    def ascii_email(self, first_name: str=None, last_name: str=None):
+        """Generate an "ascii" e-mail address (based on ``_to_ascii``). If both
+        ``first_name`` and ``last_name`` are specified, we will generate a
+        username based on them.
+
+        Args:
+            first_name (str, optional): First Name
+            last_name (str, optional): Last Name
+        Returns:
+            str: The generated e-mail address
+        """
+
         pattern = self.random_element(self.email_formats)
+
+        if first_name and last_name:
+            # We will use the "arguments" feature to pass along the desired
+            # first & last names, and update the pattern to include them.
+            self.generator.set_arguments('nameargs', {'first_name': first_name, 'last_name': last_name})
+            pattern = pattern.replace('user_name', 'user_name:nameargs')
         return self._to_ascii(
             "".join(self.generator.parse(pattern).split(" ")),
         )
 
     @lowercase
-    def ascii_safe_email(self):
-        return self._to_ascii(self.user_name() + '@' + self.safe_domain_name())
+    def ascii_safe_email(self, first_name: str=None, last_name: str=None):
+        """Generate an "ascii" safe e-mail address (based on ``_to_ascii`` and
+        ``safe_email()``). If both ``first_name`` and ``last_name`` are
+        specified, we will generate a username based on them.
 
-    @lowercase
-    def ascii_free_email(self):
+        Args:
+            first_name (str, optional): First Name
+            last_name (str, optional): Last Name
+        Returns:
+            str: The generated e-mail address
+        """
+
         return self._to_ascii(
-            self.user_name() + '@' + self.free_email_domain(),
+            self.user_name(first_name=first_name, last_name=last_name) + '@' + self.safe_domain_name(),
         )
 
     @lowercase
-    def ascii_company_email(self):
+    def ascii_free_email(self, first_name: str=None, last_name: str=None):
+        """Generate an "ascii" free e-mail address (based on ``_to_ascii`` and
+        ``free_email()``). If both ``first_name`` and ``last_name`` are
+        specified, we will generate a username based on them.
+
+        Args:
+            first_name (str, optional): First Name
+            last_name (str, optional): Last Name
+        Returns:
+            str: The generated e-mail address
+        """
+
         return self._to_ascii(
-            self.user_name() + '@' + self.domain_name(),
+            self.user_name(first_name=first_name, last_name=last_name) + '@' + self.free_email_domain(),
+        )
+
+    @lowercase
+    def ascii_company_email(self, first_name: str=None, last_name: str=None):
+        """Generate an "ascii" company e-mail address (based on ``_to_ascii``
+        and ``domain_name()``). If both ``first_name`` and ``last_name`` are
+        specified, we will generate a username based on them.
+
+        Args:
+            first_name (str, optional): First Name
+            last_name (str, optional): Last Name
+        Returns:
+            str: The generated e-mail address
+        """
+
+        return self._to_ascii(
+            self.user_name(first_name=first_name, last_name=last_name) + '@' + self.domain_name(),
         )
 
     @slugify_unicode
