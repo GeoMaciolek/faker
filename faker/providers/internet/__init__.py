@@ -85,7 +85,7 @@ class Provider(BaseProvider):
         '{{last_name}}.{{first_name}}',
         '{{first_name}}.{{last_name}}',
         '{{first_name}}##',
-        '?{{last_name}}',
+        '{{first_name_abbreviated}}{{last_name}}',
     )
     email_formats = (
         '{{user_name}}@{{domain_name}}',
