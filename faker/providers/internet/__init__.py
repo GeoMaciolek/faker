@@ -174,10 +174,6 @@ class Provider(BaseProvider):
             str: The generated e-mail address
         """
 
-        # # # Check for first_name & last_name, pass along if both
-        # if first_name and last_name:
-        #     return self.user_name(first_name=first_name, last_name=last_name) + '@' + self.free_email_domain()
-        # # If we don't get both a first & last name, use the default random names
         return self.user_name(first_name=first_name, last_name=last_name) + '@' + self.free_email_domain()
 
     @lowercase
